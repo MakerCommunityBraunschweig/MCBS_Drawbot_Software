@@ -5,7 +5,7 @@ class Drawbot {
     bool ServoPos;
     int opmode;
     int delayUs;
-    int path;
+    int m1_path[], m2_path[];
     
   public:
     void set_joint_values (int,int);
@@ -14,6 +14,6 @@ class Drawbot {
     void move_steps(int,int);
     void set_delayUs(int);
     void move_step(int);
-    void define_path();
+    void move_path(int[],int[]);
     int get_values();
 };

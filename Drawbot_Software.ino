@@ -37,6 +37,7 @@ void setup() {
 
   
   db.set_joint_values(0,0);
+  db.set_delayUs(1000);
 
 }
 
@@ -51,19 +52,7 @@ void loop () {
   
   //test_run(10*period,period,delayUs);
   //test_run_2(10*period,period,delayUs,triAmp);
-  //MoveIt();
-  
-  
-  db.set_delayUs(500);
- 
-  db.set_target_values(200,400);
-  db.move_to_target();
-  delay(2000);
-  
-  db.set_target_values(0,0);
-  db.move_to_target();
-  delay(2000);
-  
-  
-
+  int m1_pos[] = {0, 800, 400};
+  int m2_pos[] = {0, 100, 500};
+  db.move_path(m1_pos, m2_pos);
 }

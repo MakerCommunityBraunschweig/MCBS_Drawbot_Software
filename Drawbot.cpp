@@ -1,5 +1,6 @@
 #include "Drawbot.h"
 #include <Arduino.h>
+#include <stdio.h>
 
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55
@@ -91,16 +92,18 @@ void Drawbot::move_to_target() {
   
   Serial.println("New pos: " + String(M1_Pos) + " | " + String(M2_Pos)); 
 
- 
 }
 
-void Drawbot::define_path() {
-  int path[2][2];
-  path[0][0] = 0;
-  path[0][1] = 0;
-  path[1][0] = 100;
-  path[1][1] = 200;
 
+void Drawbot::move_path(int m1_pos[], int m2_pos[]) {
+
+  int nop = sizeof(m1_pos);
+  for (int i=0; i <= nop; i++) {
+    set_target_values(m1_pos[i],m2_pos[i]);
+    move_to_target();
+    delay(2000); 
+  }
+  
 }
 
 int Drawbot::get_values () {
