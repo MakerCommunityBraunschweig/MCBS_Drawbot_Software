@@ -56,14 +56,14 @@ void loop () {
 
   // Define a path
 
-  int m1_pos[] = {0, 800, 400, 300};
-  int m2_pos[] = {0, 100, 500, 300};
+  int m1_pos[] = {0, 300, 3000, 3700, 4000, 1200};
+  int m2_pos[] = {0, 300, 200, 1200, 2200, 800};
 
 
   db.home_all();
   //db.manual_mode();
   
-  db.set_delayUs(1000);                   // Defines the velocity
+  db.set_delayUs(300);                   // Defines the velocity
   
 //Move this path 5 times
  
