@@ -65,8 +65,8 @@ void loop () {
   
   db.set_delayUs(1000);                   // Defines the velocity
   
-  //Move this path 5 times
-  
+//Move this path 5 times
+ 
   for(int i = 1; i <= 5; i++) {
     db.move_path(m1_pos, m2_pos);
   }

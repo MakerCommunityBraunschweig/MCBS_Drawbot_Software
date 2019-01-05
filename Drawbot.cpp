@@ -28,6 +28,32 @@ void Drawbot::set_target_values (int t1, int t2) {
 
 void Drawbot::move_steps (int s1, int s2) {
 
+  // save old positions
+  int M1_Old = M1_Pos;
+  int M2_Old = M2_Pos;
+
+  // update joint positions
+  if(M1_Dir == FWD) {
+    M1_Pos += s1;
+  } else if (M1_Dir == BCKWD) {
+    M1_Pos -= s1;
+  }
+  
+  if(M2_Dir == FWD) {
+    M2_Pos += s2;
+  } else if (M2_Dir == BCKWD) {
+    M2_Pos -= s2;
+  }
+
+  // ensure that the desired movement is possible
+  bool possible = check_boundaries(M1_Pos, M2_Pos);
+  if (possible == false) {
+    Serial.println ("Position nicht anfahrbar! Grenzen werden verletzt!");
+    M1_Pos = M1_Old;
+    M2_Pos = M2_Old;
+    return;
+  }
+
   int m1_steps = 0, m2_steps = 0;
   while((m1_steps < s1) and (m2_steps < s2)) {
     move_step(1);
@@ -42,20 +68,7 @@ void Drawbot::move_steps (int s1, int s2) {
   while(m2_steps < s2) {
     move_step(2);
     m2_steps++;
-  }
-
-  // update joint positions
-  if(M1_Dir == FWD) {
-    M1_Pos += s1;
-  } else if (M1_Dir == BCKWD) {
-    M1_Pos -= s1;
-  }
-  
-  if(M2_Dir == FWD) {
-    M2_Pos += s2;
-  } else if (M2_Dir == BCKWD) {
-    M2_Pos -= s2;
-  }
+  } 
   
 }
 
@@ -216,4 +229,39 @@ void Drawbot::invert_directions() {
   M1_Dir = -M1_Dir;
   M2_Dir = -M2_Dir;
   set_directions(M1_Dir, M2_Dir);
+}
+
+
+bool Drawbot::check_boundaries(int m1, int m2) {
+
+  float m1_max = 1.667 * m2 + 4000;  
+  float m1_min = 2.333 * m2 - 1160;  
+  
+  float m2_min = 0.5 * m1 - 1820;  
+  float m2_max = 0.5 * m1 + 242;
+
+  bool valid = true;
+
+  if ((m1 < m1_max) and (m1 > m1_min)) {
+    // do nothing
+  } else {
+    Serial.println("Desired position of motor 1 invalid!");
+    valid = false;
+  }
+  if ((m2 < m2_max) and (m2 > m2_min)) {
+    // do nothing
+  } else {
+    Serial.println("Desired position of motor 2 invalid!");
+    valid = false;
+  }
+
+  if (m1 <= 7000) {
+    // do nothing
+  } else {
+    Serial.println("Motor 1 hat seine Grenze erreicht.");
+    valid = false;
+  }
+
+  return valid; 
+  
 }

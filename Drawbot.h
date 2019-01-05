@@ -25,6 +25,7 @@ class Drawbot {
     void set_path(int[], int[]);
     void move_path(int[],int[]);
     void manual_mode();
+    bool check_boundaries(int,int);
     
     void home_all();
 };
