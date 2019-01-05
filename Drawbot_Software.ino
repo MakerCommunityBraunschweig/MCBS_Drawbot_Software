@@ -14,6 +14,8 @@
 
 #define LED_PIN            13
 
+#define SIGNAL_PIN          3
+
 
 Drawbot db;
 
@@ -27,6 +29,11 @@ void setup() {
   pinMode(Y_DIR_PIN, OUTPUT);
   pinMode(Y_ENABLE_PIN, OUTPUT);
 
+  pinMode(X_MIN_PIN, INPUT);
+  pinMode(X_MAX_PIN, INPUT);
+  pinMode(Y_MIN_PIN, INPUT);
+  pinMode(Y_MAX_PIN, INPUT);
+
   pinMode(LED_PIN, OUTPUT);
   
   digitalWrite(X_ENABLE_PIN, LOW);
@@ -36,23 +43,42 @@ void setup() {
   Serial.println("Test");
 
   
-  db.set_joint_values(0,0);
-  db.set_delayUs(1000);
+  db.set_delayUs(200);
+  db.isHomed = false;
 
 }
 
 
 void loop () {
+
   
-
-
   int period = 2000; 
-  int delayUs = 1000;
+  int delayUs = 500;
   int triAmp = 500;
   
   //test_run(10*period,period,delayUs);
   //test_run_2(10*period,period,delayUs,triAmp);
-  int m1_pos[] = {0, 800, 400};
-  int m2_pos[] = {0, 100, 500};
-  db.move_path(m1_pos, m2_pos);
+  //int m1_pos[] = {0, 800, 400, 300};
+  //int m2_pos[] = {0, 100, 500, 300};
+  //db.move_path(m1_pos, m2_pos);
+
+  if (!db.isHomed) {
+    db.home_all();
+    db.isHomed = true;
+  }
+
+  delay(10000);
+  int a = db.get_joint_values();
+  
+}
+
+void read_endstops() {
+
+  Serial.print(digitalRead(X_MIN_PIN));
+  Serial.print(digitalRead(X_MAX_PIN));
+  Serial.print(digitalRead(Y_MIN_PIN));
+  Serial.println(digitalRead(Y_MAX_PIN));
+
+  delay(200);
+  
 }

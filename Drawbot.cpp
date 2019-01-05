@@ -106,6 +106,30 @@ void Drawbot::move_path(int m1_pos[], int m2_pos[]) {
   
 }
 
-int Drawbot::get_values () {
-  return XPos, YPos;
+int Drawbot::get_joint_values () {
+  return M1_Pos, M2_Pos;
+}
+
+void Drawbot::home_all() {
+
+  set_delayUs(1500);
+  digitalWrite(X_DIR_PIN, LOW);
+  digitalWrite(Y_DIR_PIN, LOW);
+  
+  while(digitalRead(X_MIN_PIN) and digitalRead(Y_MIN_PIN)) {
+    move_step(1);
+    move_step(2);
+  }
+
+  while(digitalRead(X_MIN_PIN)) {
+    move_step(1);
+  }
+
+  while(digitalRead(Y_MIN_PIN)) {
+    move_step(2);
+  }
+  
+  set_joint_values(0,0);
+  Serial.println("Homed all!");
+  
 }
