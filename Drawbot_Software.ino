@@ -19,6 +19,7 @@
 
 Drawbot db;
 
+
 void setup() {
   
   pinMode(X_STEP_PIN, OUTPUT);
@@ -45,30 +46,30 @@ void setup() {
   
   db.set_delayUs(200);
   db.isHomed = false;
+  db.set_directions(1,1);
+  db.home_all();
 
 }
 
 
 void loop () {
 
-  
-  int period = 2000; 
-  int delayUs = 500;
-  int triAmp = 500;
-  
-  //test_run(10*period,period,delayUs);
-  //test_run_2(10*period,period,delayUs,triAmp);
-  //int m1_pos[] = {0, 800, 400, 300};
-  //int m2_pos[] = {0, 100, 500, 300};
-  //db.move_path(m1_pos, m2_pos);
+  // Define a path
 
-  if (!db.isHomed) {
-    db.home_all();
-    db.isHomed = true;
+  int m1_pos[] = {0, 800, 400, 300};
+  int m2_pos[] = {0, 100, 500, 300};
+
+
+  db.home_all();
+  //db.manual_mode();
+  
+  db.set_delayUs(1000);                   // Defines the velocity
+  
+  //Move this path 5 times
+  
+  for(int i = 1; i <= 5; i++) {
+    db.move_path(m1_pos, m2_pos);
   }
-
-  delay(10000);
-  int a = db.get_joint_values();
   
 }
 
