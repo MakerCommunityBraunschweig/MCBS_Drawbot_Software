@@ -44,10 +44,11 @@ void setup() {
   Serial.println("Test");
 
   
-  db.set_delayUs(200);
+  db.set_delayUs(1000);
   db.isHomed = false;
-  db.set_directions(1,1);
+  db.set_directions(FWD,FWD);
   db.home_all();
+
 
 }
 
@@ -59,18 +60,25 @@ void loop () {
   int m1_pos[] = {0, 300, 3000, 3700, 4000, 1200};
   int m2_pos[] = {0, 300, 200, 1200, 2200, 800};
 
+  db.move_linear_in_js(300,300);
+  db.set_directions(FWD,BCKWD);
+  db.move_linear_in_js(2700,100);
+  db.set_directions(FWD,FWD);
+  db.move_linear_in_js(1700,1000);
+  
 
   db.home_all();
-  //db.manual_mode();
+ //db.manual_mode();
   
   db.set_delayUs(300);                   // Defines the velocity
   
 //Move this path 5 times
  
-  for(int i = 1; i <= 5; i++) {
-    db.move_path(m1_pos, m2_pos);
-  }
-  
+//  for(int i = 1; i <= 5; i++) {
+//    db.move_path(m1_pos, m2_pos);
+//  }
+
+  delay(10000);
 }
 
 void read_endstops() {

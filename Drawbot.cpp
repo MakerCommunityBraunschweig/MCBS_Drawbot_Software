@@ -84,19 +84,21 @@ void Drawbot::move_step(int motor) {
 
   int pin;
   switch(motor) {
-    case 1: pin = X_STEP_PIN; break;
-    case 2: pin = Y_STEP_PIN; break;
+    case 1: pin = X_STEP_PIN; M1_Pos += M1_Dir; break;
+    case 2: pin = Y_STEP_PIN; M2_Pos += M2_Dir; break;
   }
   digitalWrite(pin, HIGH);
   delayMicroseconds(delayUs);
   digitalWrite(pin, LOW);
   delayMicroseconds(delayUs);
+  
 }
 
 
 void Drawbot::move_to_target() {
 
   int m1_dir, m2_dir;
+  
   // set directions
   if(M1_Target > M1_Pos) {
     m1_dir = FWD;
@@ -108,22 +110,21 @@ void Drawbot::move_to_target() {
   } else if (M2_Target < M2_Pos) {
     m2_dir = BCKWD;
   }
+  
   set_directions(m1_dir, m2_dir);
+  
+  int a = abs(M1_Target-M1_Pos);
+  int b = abs(M2_Target-M2_Pos);
+  
+  move_linear_in_js(a,b);
 
-  while((M1_Target != M1_Pos) || (M2_Target != M2_Pos)) {
-    
-    if (M1_Target != M1_Pos) {
-      move_steps(1,0);
-    }
-    if (M2_Target != M2_Pos) {
-      move_steps(0,1);
-    }
-  
-  }
-  
   Serial.println("New pos: " + String(M1_Pos) + " | " + String(M2_Pos)); 
-
+  
 }
+  
+  
+
+
 
 void Drawbot::set_path(int x[], int y[]) {
   
@@ -132,17 +133,22 @@ void Drawbot::set_path(int x[], int y[]) {
 void Drawbot::move_path(int m1_pos[], int m2_pos[]) {
 
   int nop = 6;
-  for (int i=0; i < nop; i++) {
+  for (int i=0; i < 3; i++) {
     set_target_values(m1_pos[i],m2_pos[i]);
+    Serial.println("Target: " + String(m1_pos[i]) + " | " + String(m2_pos[i]));
     move_to_target();
     delay(50); 
   }
-  
+      
 }
 
-int Drawbot::get_joint_values () {
+int Drawbot::get_joint_value(int joint) {
 
-  return M1_Pos, M2_Pos;
+  switch(joint) {
+    case 1: return M1_Pos; break;
+    case 2: return M2_Pos; break;
+  }
+  
 }
 
 void Drawbot::home_all() {
@@ -263,5 +269,42 @@ bool Drawbot::check_boundaries(int m1, int m2) {
   }
 
   return valid; 
+  
+}
+
+void Drawbot::move_linear_in_js (int s1, int s2) {
+  
+  int nos = max(s1,s2);                                                     // Number of total steps for movement
+  float m1_spi = (float) s1/nos,   m2_spi = (float) s2/nos;
+  int m1_steps = 0, m2_steps = 0;
+  int m1_index[nos], m2_index[nos];
+
+  // Berechnung
+  for(int i = 1; i <= nos; i++){    
+    if(m1_steps < i*m1_spi) {
+      m1_index[i] = 1;
+      m1_steps++;
+    } else {
+      m1_index[i] = 0;
+    }
+    if(m2_steps < i*m2_spi) {
+      m2_index[i] = 1;
+      m2_steps++;
+    } else {
+      m2_index[i] = 0;
+    }
+    //Serial.println(String(m1_index[i]) + String(m2_index[i]));
+  }
+
+  // Ausführung
+  for(int i = 1; i <= nos; i++){    
+    if(m1_index[i] == 1) {
+      move_step(1);
+    }
+    if(m2_index[i] == 1) {
+      move_step(2);
+      
+    }
+  }
   
 }
