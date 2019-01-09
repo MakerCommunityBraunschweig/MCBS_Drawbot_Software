@@ -132,17 +132,12 @@ void Drawbot::set_path(int x[], int y[]) {
 
 void Drawbot::move_path(int m1_pos[], int m2_pos[]) {
 
-<<<<<<< HEAD
   int nop = 6;
   for (int i=0; i < 3; i++) {
-=======
-  int nop = sizeof(m1_pos);
-  for (int i=0; i <= nop; i++) {
->>>>>>> parent of c002de1... Grenzüberwachung adaptiert
     set_target_values(m1_pos[i],m2_pos[i]);
     Serial.println("Target: " + String(m1_pos[i]) + " | " + String(m2_pos[i]));
     move_to_target();
-    delay(2000); 
+    delay(50); 
   }
       
 }
@@ -253,13 +248,13 @@ bool Drawbot::check_boundaries(int m1, int m2) {
 
   bool valid = true;
 
-  if ((m1 < m1_max) and (m1 > m1_min)) {
+  if ((m1 < m1_max + 100) and (m1 > m1_min - 100)) {
     // do nothing
   } else {
     Serial.println("Desired position of motor 1 invalid!");
     valid = false;
   }
-  if ((m2 < m2_max) and (m2 > m2_min)) {
+  if ((m2 < m2_max + 100) and (m2 > m2_min - 100)) {
     // do nothing
   } else {
     Serial.println("Desired position of motor 2 invalid!");
