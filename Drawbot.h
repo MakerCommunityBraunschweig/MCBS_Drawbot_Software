@@ -15,7 +15,7 @@ class Drawbot {
     void set_directions (int,int);
     void invert_directions();
     void set_joint_values (int,int);
-    int get_joint_value(int);
+    int get_joint_values();
     void set_target_values (int,int);
     void move_to_target();
     void move_steps(int,int);
@@ -26,7 +26,6 @@ class Drawbot {
     void move_path(int[],int[]);
     void manual_mode();
     bool check_boundaries(int,int);
-    void move_linear_in_js(int,int);
     
     void home_all();
 };
