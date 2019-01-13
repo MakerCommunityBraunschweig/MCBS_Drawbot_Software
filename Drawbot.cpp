@@ -144,6 +144,15 @@ void Drawbot::move_linear_in_js (int s1, int s2) {
   M1_Pos += s1;
   M2_Pos += s2;
 
+   // ensure that the desired movement is possible
+  bool possible = check_boundaries(M1_Pos, M2_Pos);
+  if (possible == false) {
+    M1_Pos -= s1;
+    M2_Pos -= s2;
+    Serial.println ("Position nicht anfahrbar! Grenzen werden verletzt!");
+    return;
+  }
+
   s1 = abs(s1); s2 = abs(s2);
   int nos = max(s1,s2);                                       // Number of steps
   float m1_spi = (float) s1/nos,   m2_spi = (float) s2/nos;   // Steps per iteration
