@@ -41,14 +41,13 @@ void setup() {
   digitalWrite(Y_ENABLE_PIN, LOW);
 
   Serial.begin(9600);
-  Serial.println("Test");
+  Serial.println("Neustart");
 
   
-  db.set_delayUs(200);
-  db.isHomed = false;
-  db.set_directions(1,1);
+  db.set_delayUs(500);
+  db.set_directions(FWD,FWD);
   db.home_all();
-
+  
 }
 
 
@@ -59,17 +58,16 @@ void loop () {
   int m1_pos[] = {0, 300, 3000, 3700, 4000, 1200};
   int m2_pos[] = {0, 300, 200, 1200, 2200, 800};
 
+//  db.manual_mode();
+  
+  db.set_delayUs(1000);                   // Defines the velocity 
+  
+  //db.move_path(m1_pos, m2_pos);
 
-  db.home_all();
-  //db.manual_mode();
-  
-  db.set_delayUs(300);                   // Defines the velocity
-  
-//Move this path 5 times
- 
-  for(int i = 1; i <= 5; i++) {
-    db.move_path(m1_pos, m2_pos);
-  }
+  db.move_linear_in_js(300,300);
+  db.move_linear_in_js(2700,-100);
+
+  delay(100000);
   
 }
 

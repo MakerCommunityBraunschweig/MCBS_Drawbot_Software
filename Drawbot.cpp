@@ -1,6 +1,7 @@
 #include "Drawbot.h"
 #include <Arduino.h>
 #include <stdio.h>
+#include <math.h>
 
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55
@@ -96,32 +97,12 @@ void Drawbot::move_step(int motor) {
 
 void Drawbot::move_to_target() {
 
-  int m1_dir, m2_dir;
-  // set directions
-  if(M1_Target > M1_Pos) {
-    m1_dir = FWD;
-  } else if (M1_Target < M1_Pos) {
-    m1_dir = BCKWD;
-  }
-  if(M2_Target > M2_Pos) {
-    m2_dir = FWD;
-  } else if (M2_Target < M2_Pos) {
-    m2_dir = BCKWD;
-  }
-  set_directions(m1_dir, m2_dir);
+  int m1_steps = M1_Target - M1_Pos;
+  int m2_steps = M2_Target - M2_Pos;
 
-  while((M1_Target != M1_Pos) || (M2_Target != M2_Pos)) {
-    
-    if (M1_Target != M1_Pos) {
-      move_steps(1,0);
-    }
-    if (M2_Target != M2_Pos) {
-      move_steps(0,1);
-    }
+  move_linear_in_js(m1_steps,m2_steps);
   
-  }
-  
-  Serial.println("New pos: " + String(M1_Pos) + " | " + String(M2_Pos)); 
+  Serial.println("New pos: " + String(M1_Pos) + " | " + String(M2_Pos));
 
 }
 
@@ -131,18 +112,26 @@ void Drawbot::set_path(int x[], int y[]) {
 
 void Drawbot::move_path(int m1_pos[], int m2_pos[]) {
 
-  int nop = 6;
-  for (int i=0; i < nop; i++) {
-    set_target_values(m1_pos[i],m2_pos[i]);
-    move_to_target();
-    delay(50); 
+  int nop = 0;
+  int m1_steps, m2_steps;
+
+  for(int i = 0; i < nop; i++) {
+    m1_steps = m1_pos[i] - M1_Pos;
+    m2_steps = m2_pos[i] - M2_Pos;
+    move_linear_in_js(m1_steps, m2_steps);
+    delay(1000);
+    Serial.println(String(M1_Pos) + " | " + String(M2_Pos));
   }
   
 }
 
-int Drawbot::get_joint_values () {
+int Drawbot::get_joint_value (int joint) {
 
-  return M1_Pos, M2_Pos;
+  switch(joint) {
+    case 1: return M1_Pos;
+    case 2: return M2_Pos;
+  }
+  
 }
 
 void Drawbot::home_all() {
@@ -185,7 +174,7 @@ void Drawbot::manual_mode() {
   Serial.println("Joint positions: " + String(M1_Pos) + " | " + String(M2_Pos));
   
 
-  while(millis() < 500000) {
+  while(millis() < 5000000) {
     if((digitalRead(X_MIN_PIN) == 0) and (digitalRead(Y_MIN_PIN)==0)) {
       // change directions
       invert_directions();
@@ -265,3 +254,34 @@ bool Drawbot::check_boundaries(int m1, int m2) {
   return valid; 
   
 }
+
+
+void Drawbot::move_linear_in_js (int s1, int s2) {
+
+  // Set directions
+  int m1_dir = copysign(1.0, s1);
+  int m2_dir = copysign(1.0, s2);
+  set_directions(m1_dir, m2_dir);
+  
+  // Set new motor positions
+  M1_Pos += s1;
+  M2_Pos += s2;
+
+  int nos = max(s1,s2);                                       // Number of steps
+  float m1_spi = (float) s1/nos,   m2_spi = (float) s2/nos;   // Steps per iteration
+  int m1_steps = 0,                m2_steps = 0;              // Count the steps
+
+  // Berechnung & Ausführung
+  for(int i = 1; i <= nos; i++){    
+    if (m1_steps < i*m1_spi) {
+      move_step(1);
+      m1_steps++;
+    }
+    if (m2_steps < i*m2_spi) {
+      move_step(2);
+      m2_steps++;
+    } 
+  }
+
+}
+
