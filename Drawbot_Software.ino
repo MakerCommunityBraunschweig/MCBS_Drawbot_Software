@@ -55,18 +55,16 @@ void loop () {
 
   // Define a path
 
-  int m1_pos[] = {0, 300, 3000, 3700, 4000, 1200};
-  int m2_pos[] = {0, 300, 200, 1200, 2200, 800};
+  int m1_pos[] = {0, 300, 3000, 3700, 4000, 3700, 3000, 300, 0};
+  int m2_pos[] = {0, 300, 200, 1200, 2200, 1200, 200, 300, 0};
+
 
 //  db.manual_mode();
   
-  db.set_delayUs(1000);                   // Defines the velocity 
+  db.set_delayUs(500);                   // Defines the velocity 
   
-  //db.move_path(m1_pos, m2_pos);
-
-  db.move_linear_in_js(300,300);
-  db.move_linear_in_js(2700,-100);
-
+  db.move_path(m1_pos, m2_pos, 9);
+  
   delay(100000);
   
 }

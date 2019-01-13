@@ -114,23 +114,20 @@ void Drawbot::move_steps (int s1, int s2) {
   M1_Pos = M1_New_Pos;    M2_Pos = M2_New_Pos;        // update motor positions
   
 }
+  
 
 
 
 
+void Drawbot::move_path(int m1_pos[], int m2_pos[], int nop) {
 
-void Drawbot::move_path(int m1_pos[], int m2_pos[]) {
-
-  int nop = sizeof(m1_pos)/sizeof(int);              // get number of points
-  nop = 5;                                           // set nop manually, if the method above is not working                 
   int m1_steps, m2_steps;
 
   for(int i = 0; i < nop; i++) {
     m1_steps = m1_pos[i] - M1_Pos;
     m2_steps = m2_pos[i] - M2_Pos;
     move_linear_in_js(m1_steps, m2_steps);
-    delay(1000);
-    Serial.println(String(M1_Pos) + " | " + String(M2_Pos));
+    Serial.println("New pos: " + String(M1_Pos) + " | " + String(M2_Pos));
   }
   
 }
@@ -147,10 +144,11 @@ void Drawbot::move_linear_in_js (int s1, int s2) {
   M1_Pos += s1;
   M2_Pos += s2;
 
+  s1 = abs(s1); s2 = abs(s2);
   int nos = max(s1,s2);                                       // Number of steps
   float m1_spi = (float) s1/nos,   m2_spi = (float) s2/nos;   // Steps per iteration
   int m1_steps = 0,                m2_steps = 0;              // Count the steps
-
+  
   // Berechnung & Ausführung
   for(int i = 1; i <= nos; i++){    
     if (m1_steps < i*m1_spi) {

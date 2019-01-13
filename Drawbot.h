@@ -16,7 +16,7 @@ class Drawbot {
 
     void move_step(int);
     void move_steps(int,int);
-    void move_path(int[],int[]);
+    void move_path(int[],int[], int);
     void move_linear_in_js(int,int);
     void home_all();
     
