@@ -1,4 +1,5 @@
 #include "Drawbot.h"
+#include "Kinematics.h"
 
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55
@@ -18,6 +19,7 @@
 
 
 Drawbot db;
+Kinematics kin;
 
 
 void setup() {
@@ -44,9 +46,15 @@ void setup() {
   Serial.println("Neustart");
 
   
-  db.set_delayUs(500);
-  db.set_directions(FWD,FWD);
-  db.home_all();
+//  db.set_delayUs(500);
+//  db.set_directions(FWD,FWD);
+//  db.home_all();
+
+    kin.set_parameters(20,20,2);
+
+
+    kin.solveIK(20,0);          // Runtime Arduino Uno: 640us 
+    kin.solveFK(60.71,34.84);
   
 }
 
@@ -63,9 +71,9 @@ void loop () {
 
 //  db.manual_mode();
   
-  db.set_delayUs(500);                   // Defines the velocity 
-  
-  db.move_path(m1_pos, m2_pos, 9);
+//  db.set_delayUs(500);                   // Defines the velocity 
+//  
+//  db.move_path(m1_pos, m2_pos, 9);
   
   delay(100000);
   

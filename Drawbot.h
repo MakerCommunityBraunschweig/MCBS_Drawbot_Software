@@ -23,4 +23,7 @@ class Drawbot {
     void manual_mode();
     bool check_boundaries(int,int);
 
+    double solveFK(float, float);
+    double solveIK(float, float);
+
 };

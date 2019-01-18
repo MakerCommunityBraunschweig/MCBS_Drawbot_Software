@@ -270,4 +270,3 @@ bool Drawbot::check_boundaries(int m1, int m2) {
   return valid; 
   
 }
-
