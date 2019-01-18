@@ -1,7 +1,9 @@
 #include "Kinematics.h"
 #include <Arduino.h>
 
-double Kinematics::solveFK(float q1, float q2) {
+
+
+Kinematics::TF Kinematics::solveFK(float q1, float q2) {
   int r01 = 20;
   int r1E_a = 20;
   int r1E_b = 2;
@@ -9,14 +11,12 @@ double Kinematics::solveFK(float q1, float q2) {
   float xE = r01*sin(q1/r2d) + r1E_a*cos(q2/r2d) + r1E_b*cos((90-q2)/r2d);
   float yE = r01*cos(q1/r2d) - r1E_a*sin(q2/r2d) + r1E_b*sin((90-q2)/r2d);
 
-  Serial.println(xE);
-  Serial.println(yE);
-
-  return xE;
+  TF fk_pos = {xE, yE};
+  return fk_pos;
 
 }
 
-double Kinematics::solveIK(float xE, float yE) {
+Kinematics::TF Kinematics::solveIK(float xE, float yE) {
 
 // Inverse Kinematik für Drawbot berechnen
 
@@ -45,9 +45,9 @@ if (abs(input) > 1) {
 
 double r2d = 180/PI;
 
-double gamma = acos( input ) * r2d;
-double phi_E = atan2(yE, xE) * r2d;
-double theta_1 = 90 - gamma - phi_E;      // Winkel 1 berechnen
+float gamma = acos( input ) * r2d;
+float phi_E = atan2(yE, xE) * r2d;
+float theta_1 = 90 - gamma - phi_E;      // Winkel 1 berechnen
 
 //  Gelenkwinkel 2 bestimmen (Einheit: °)
 float r01_vec[] = {r01*sin(theta_1/r2d), r01*cos(theta_1/r2d)};
@@ -65,10 +65,9 @@ float y2 = 0;
 
 float theta_2 = (atan2(y2,y1) - atan2(x2,x1))*r2d;
 
-Serial.println(theta_1);
-Serial.println(theta_2);
+TF ik_angles = {theta_1, theta_2};
 
-return(theta_2);
+return ik_angles;
 
 
 }

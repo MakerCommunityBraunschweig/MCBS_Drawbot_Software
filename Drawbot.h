@@ -1,3 +1,4 @@
+#include "Kinematics.h"
 
 #define FWD       1
 #define BCKWD     -1
@@ -5,6 +6,7 @@
 class Drawbot {
     int M1_Pos, M2_Pos, M1_Dir, M2_Dir;
     int delayUs;
+    Kinematics kin;
     
   public:
     void set_directions (int,int);
@@ -18,6 +20,7 @@ class Drawbot {
     void move_steps(int,int);
     void move_path(int[],int[], int);
     void move_linear_in_js(int,int);
+    void move_to_point_XY(float, float);
     void home_all();
     
     void manual_mode();

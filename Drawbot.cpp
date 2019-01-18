@@ -114,6 +114,19 @@ void Drawbot::move_steps (int s1, int s2) {
   M1_Pos = M1_New_Pos;    M2_Pos = M2_New_Pos;        // update motor positions
   
 }
+
+void Drawbot::move_to_point_XY(float xE, float yE) {
+  
+  kin.set_parameters(20,20,2);
+  Kinematics::TF q;
+  q = kin.solveIK(xE,yE);
+  float q1 = q.c1;
+  float q2 = q.c2;
+  int m1 = round(q1*39);
+  int m2 = round(q2*39);
+  Serial.println(m1);
+  Serial.println(m2);
+}
   
 
 
