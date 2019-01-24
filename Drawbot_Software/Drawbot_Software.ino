@@ -1,4 +1,7 @@
 #include "Drawbot.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <Arduino.h>
 
 
 #define X_STEP_PIN         54
@@ -46,40 +49,36 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Neustart");
 
-  
-    
-
   delay(1000);
 
   db.home_all();
-  db.set_delayUs(500);
+  db.set_delayUs(1000);
   delay(2000);
   db.move_by_angles(60,0);    // Grundstellung
   db.init_angles();           // Winkel auf Null setzen
   delay(2000);
-  db.move_to_point_XY(250,100);
-  delay(2000);
-  db.move_to_point_XY(300,100);
+
+  int xp[] = {250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250};
+  int yp[] = {50,   60,  70,  80,  90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230};
+
+  int l = sizeof(xp)/sizeof(xp[1]);   // Länge des Pfads bestimmen
+  Serial.println(l);
+
+  //db.move_path_XY(xp,yp,l);
+
+  int x= 250;
+  for(int x = 250; x <= 350; x+=10) {
+    for(int y = 50; y <= 230; y+=10) {
+      db.move_to_point_XY(x,y);
+    }
+  }
+  
 }
 
 
 void loop () {
 
-  // Define a path
-
-//  int m1_pos[] = {0, 300, 3000, 3700, 4000, 3700, 3000, 300, 0};
-//  int m2_pos[] = {0, 300, 200, 1200, 2200, 1200, 200, 300, 0};
-
-  //int m1_pos[] = {0, 1000, 0};
-  //int m2_pos[] = {0, 800, 0};
-
-//  db.manual_mode();
-  
-//  db.set_delayUs(500);                   // Defines the velocity 
-//  
-//  db.move_path(m1_pos, m2_pos, 9);
-  
-  delay(100000);
+  // do nothing
   
 }
   

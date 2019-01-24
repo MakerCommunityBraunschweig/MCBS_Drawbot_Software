@@ -20,6 +20,7 @@ class Drawbot {
     void move_step(int);
     void move_steps(int,int);
     void move_path(int[],int[], int);
+    void move_path_XY(int[],int[], int);
     void move_linear_in_js(int,int);
     void move_by_angles(float, float);
     void move_to_angles(float, float);

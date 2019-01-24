@@ -132,9 +132,15 @@ void Drawbot::move_to_angles(float q1, float q2) {
   float delta_1 = q1 - theta_1;
   float delta_2 = q2 - theta_2;
 
+  int m1 = round(delta_1*39);
+  int m2 = round(delta_2*39);
   
-  
-  move_by_angles(delta_1, delta_2);
+  Serial.println("Sollwinkel: " + String(theta_1) + " | " + String(theta_2));
+  Serial.println("Soll-Steps: " + String(m1) + " | " + String(m2));
+
+  move_linear_in_js(m1, m2);
+  theta_1 = q1;
+  theta_2 = q2;
   
 }
 
@@ -143,15 +149,26 @@ void Drawbot::init_angles() {
   theta_2 = 0;
 }
 
-void Drawbot::move_by_angles(float theta_1, float theta_2) {
+void Drawbot::move_by_angles(float q1, float q2) {
   
-  int m1 = round(theta_1*39);
-  int m2 = round(theta_2*39);
+  int m1 = round(q1*39);
+  int m2 = round(q2*39);
   
   Serial.println("Sollwinkel: " + String(theta_1) + " | " + String(theta_2));
   Serial.println("Soll-Steps: " + String(m1) + " | " + String(m2));
 
   move_linear_in_js(m1, m2);
+  theta_1 += q1;
+  theta_2 += q2;
+  
+}
+
+void Drawbot::move_path_XY(int x[], int y[], int nop) {
+
+  for(int i = 0; i < nop; i++) {
+    move_to_point_XY(x[i],y[i]);
+    Serial.println("New pos: " + String(x[i]) + " | " + String(y[i]));
+  }
   
 }
 
@@ -181,6 +198,8 @@ void Drawbot::move_linear_in_js (int s1, int s2) {
   // Set new motor positions
   M1_Pos += s1;
   M2_Pos += s2;
+
+  Serial.println("Desired motor positions: " + String(M1_Pos) + " | " + String(M2_Pos));
 
    // ensure that the desired movement is possible
   bool possible = check_boundaries(M1_Pos, M2_Pos);
