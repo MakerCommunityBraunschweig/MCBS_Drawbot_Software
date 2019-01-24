@@ -1,5 +1,6 @@
 #include "Drawbot.h"
 
+
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55
 #define X_ENABLE_PIN       38
@@ -18,6 +19,8 @@
 
 
 Drawbot db;
+
+
 
 
 void setup() {
@@ -41,14 +44,22 @@ void setup() {
   digitalWrite(Y_ENABLE_PIN, LOW);
 
   Serial.begin(9600);
-  Serial.println("Test");
+  Serial.println("Neustart");
 
   
-  db.set_delayUs(200);
-  db.isHomed = false;
-  db.set_directions(1,1);
-  db.home_all();
+    
 
+  delay(1000);
+
+  db.home_all();
+  db.set_delayUs(500);
+  delay(2000);
+  db.move_by_angles(60,0);    // Grundstellung
+  db.init_angles();           // Winkel auf Null setzen
+  delay(2000);
+  db.move_to_point_XY(250,100);
+  delay(2000);
+  db.move_to_point_XY(300,100);
 }
 
 
@@ -56,23 +67,22 @@ void loop () {
 
   // Define a path
 
-  int m1_pos[] = {0, 300, 3000, 3700, 4000, 1200};
-  int m2_pos[] = {0, 300, 200, 1200, 2200, 800};
+//  int m1_pos[] = {0, 300, 3000, 3700, 4000, 3700, 3000, 300, 0};
+//  int m2_pos[] = {0, 300, 200, 1200, 2200, 1200, 200, 300, 0};
 
+  //int m1_pos[] = {0, 1000, 0};
+  //int m2_pos[] = {0, 800, 0};
 
-  db.home_all();
-  //db.manual_mode();
+//  db.manual_mode();
   
-  db.set_delayUs(300);                   // Defines the velocity
+//  db.set_delayUs(500);                   // Defines the velocity 
+//  
+//  db.move_path(m1_pos, m2_pos, 9);
   
-//Move this path 5 times
- 
-  for(int i = 1; i <= 5; i++) {
-    db.move_path(m1_pos, m2_pos);
-  }
+  delay(100000);
   
 }
-
+  
 void read_endstops() {
 
   Serial.print(digitalRead(X_MIN_PIN));
