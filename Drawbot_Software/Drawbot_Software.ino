@@ -17,13 +17,11 @@
 #define Y_MAX_PIN          15
 
 #define LED_PIN            13
-
 #define SIGNAL_PIN          3
 
 
 Drawbot db;
-
-
+Kinematics kin;
 
 
 void setup() {
@@ -49,29 +47,15 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Neustart");
 
-  delay(1000);
 
-  db.home_all();
-  db.set_delayUs(1000);
-  delay(2000);
-  db.move_by_angles(60,0);    // Grundstellung
-  db.init_angles();           // Winkel auf Null setzen
-  delay(2000);
+  float xE = 200, yE = 220;
+  
+  Kinematics::TF q;
+  q = kin.solveIK_advanced(xE,yE);
+  float q1 = q.c1;
+  float q2 = q.c2;
+  Serial.println(String(q1) + " | " + String(q2));
 
-  int xp[] = {250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250, 250};
-  int yp[] = {50,   60,  70,  80,  90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230};
-
-  int l = sizeof(xp)/sizeof(xp[1]);   // Länge des Pfads bestimmen
-  Serial.println(l);
-
-  //db.move_path_XY(xp,yp,l);
-
-  int x= 250;
-  for(int x = 250; x <= 350; x+=10) {
-    for(int y = 50; y <= 230; y+=10) {
-      db.move_to_point_XY(x,y);
-    }
-  }
   
 }
 
@@ -79,16 +63,5 @@ void setup() {
 void loop () {
 
   // do nothing
-  
-}
-  
-void read_endstops() {
-
-  Serial.print(digitalRead(X_MIN_PIN));
-  Serial.print(digitalRead(X_MAX_PIN));
-  Serial.print(digitalRead(Y_MIN_PIN));
-  Serial.println(digitalRead(Y_MAX_PIN));
-
-  delay(200);
   
 }
