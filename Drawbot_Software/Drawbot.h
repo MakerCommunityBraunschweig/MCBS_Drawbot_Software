@@ -2,6 +2,7 @@
 
 #define FWD       1
 #define BCKWD     -1
+#define DEG       37
 
 class Drawbot {
     int M1_Pos, M2_Pos, M1_Dir, M2_Dir;

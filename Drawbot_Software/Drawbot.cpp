@@ -116,14 +116,19 @@ void Drawbot::move_steps (int s1, int s2) {
 }
 
 void Drawbot::move_to_point_XY(float xE, float yE) {
-  
-  kin.set_parameters(20.7,23,2.8);
+
   Kinematics::TF q;
-  q = kin.solveIK(xE,yE);
+  q = kin.solveIK_advanced(xE,yE);
   float q1 = q.c1;
   float q2 = q.c2;
-
-  move_to_angles(q1, q2);
+  float delta_1 = q1 - theta_1;
+  float delta_2 = q2 - theta_2;
+  int m1 = round(delta_1*DEG);
+  int m2 = round(delta_2*DEG);
+  Serial.println("Sollpos: " + String(xE) + " | " + String(yE));
+  move_linear_in_js(m1, m2);
+  theta_1 = q1;
+  theta_2 = q2;
   
 }
 
@@ -132,8 +137,8 @@ void Drawbot::move_to_angles(float q1, float q2) {
   float delta_1 = q1 - theta_1;
   float delta_2 = q2 - theta_2;
 
-  int m1 = round(delta_1*39);
-  int m2 = round(delta_2*39);
+  int m1 = round(delta_1*DEG);
+  int m2 = round(delta_2*DEG);
   
   Serial.println("Sollwinkel: " + String(theta_1) + " | " + String(theta_2));
   Serial.println("Soll-Steps: " + String(m1) + " | " + String(m2));
@@ -151,11 +156,10 @@ void Drawbot::init_angles() {
 
 void Drawbot::move_by_angles(float q1, float q2) {
   
-  int m1 = round(q1*39);
-  int m2 = round(q2*39);
+  int m1 = round(q1*DEG);
+  int m2 = round(q2*DEG);
   
   Serial.println("Sollwinkel: " + String(theta_1) + " | " + String(theta_2));
-  Serial.println("Soll-Steps: " + String(m1) + " | " + String(m2));
 
   move_linear_in_js(m1, m2);
   theta_1 += q1;
@@ -199,7 +203,7 @@ void Drawbot::move_linear_in_js (int s1, int s2) {
   M1_Pos += s1;
   M2_Pos += s2;
 
-  Serial.println("Desired motor positions: " + String(M1_Pos) + " | " + String(M2_Pos));
+  //Serial.println("Desired motor positions: " + String(M1_Pos) + " | " + String(M2_Pos));
 
    // ensure that the desired movement is possible
   bool possible = check_boundaries(M1_Pos, M2_Pos);
@@ -234,7 +238,7 @@ void Drawbot::home_all() {
 
   int original_delay = get_delayUs();
 
-  set_delayUs(500);
+  set_delayUs(1000);
   set_directions(BCKWD,BCKWD);
   
   while(digitalRead(X_MIN_PIN) and digitalRead(Y_MIN_PIN)) {

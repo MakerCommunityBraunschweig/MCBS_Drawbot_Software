@@ -1,11 +1,15 @@
 #include "Kinematics.h"
 #include <Arduino.h>
 
-void Kinematics::set_parameters(float a, float b, float c) {
-  r01 = a;
-  r1E_a = b;
-  r1E_b = c;
-}
+
+int r01 = 208;                  // 20.7
+int r1E_a = 210;                  // 23
+int r1E_b = 30;                 // 2.8
+int r00 = 50;
+int r01ss = 210;
+int r11 = 50;
+float r1E = sqrt(pow(r1E_a,2) + pow(r1E_b,2));
+
 
 Kinematics::TF Kinematics::solveFK(float q1, float q2) {
 
@@ -20,18 +24,7 @@ Kinematics::TF Kinematics::solveFK(float q1, float q2) {
 
 Kinematics::TF Kinematics::solveIK(float xE, float yE) {
 
-  xE = xE / 10;
-  yE = yE / 10;
-
 // Inverse Kinematik für Drawbot berechnen
-
-// Geometrische Parameter definieren (Einheit: cm)
-  
-//float r01 = 20;                  // 20.7
-//float r1E_a = 20;                  // 23
-//float r1E_b = 2;                 // 2.8
-float r1E = sqrt(pow(r1E_a,2) + pow(r1E_b,2));
-
 
 // Pose des Endeffektors bzgl. der Basis definieren (Einheit: cm)
     // Grundstellung: xE = r1E_a;
@@ -82,17 +75,6 @@ Kinematics::TF Kinematics::solveIK_advanced(float xE, float yE) {
 
 // Inverse Kinematik für Drawbot berechnen
 
-// Geometrische Parameter definieren (Einheit: mm)
-  
-int r01 = 200;                  // 20.7
-int r1E_a = 200;                  // 23
-int r1E_b = 20;                 // 2.8
-int r00 = 30;
-int r01ss = 200;
-int r11 = 30;
-
-float r1E = sqrt(pow(r1E_a,2) + pow(r1E_b,2));
-
 
 // Pose des Endeffektors bzgl. der Basis definieren (Einheit: cm)
     // Grundstellung: xE = r1E_a;
@@ -104,6 +86,7 @@ float r0E = sqrt(pow(xE,2) + pow(yE,2));    // Abstand EE von Basis berechnen
 
     // Input für acos prüfen: komplexe Winkel abfangen!
 double input = (pow(r01,2) + pow(r0E,2) - pow(r1E,2)) / (2*r01*r0E);
+Serial.print(input);
 
 if (abs(input) > 1) {
   Serial.println("Error: IK not solveable!");
