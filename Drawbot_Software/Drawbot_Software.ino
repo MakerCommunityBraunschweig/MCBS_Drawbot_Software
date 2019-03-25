@@ -24,6 +24,7 @@
 Drawbot db;
 Kinematics kin;
 Path path1();
+path1.print_path();
 
 float xE = 210, yE = 237;
 
