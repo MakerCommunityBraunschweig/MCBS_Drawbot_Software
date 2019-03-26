@@ -5,7 +5,9 @@
 #define DEG       37
 
 class Drawbot {
+  private:
     int M1_Pos, M2_Pos, M1_Dir, M2_Dir;
+    int x_df, y_df, x_global, y_global;
     int motors_rpm;
     float theta_1, theta_2;
     Kinematics kin;
@@ -35,6 +37,8 @@ class Drawbot {
     void set_velocities(int, int);
     void enable_motors();
     void disable_motors();
+    void moveX(float, float);
+    void show_values();
 
     void manual_mode();
     bool check_boundaries(int,int);

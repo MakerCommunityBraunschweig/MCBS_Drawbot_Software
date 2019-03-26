@@ -2,136 +2,93 @@
 #include <Arduino.h>
 
 
-int r01 = 208;                  // 20.7
-int r1E_a = 210;                  // 23
-int r1E_b = 30;                 // 2.8
-int r00 = 50;
-int r01ss = 210;
-int r11 = 50;
-float r1E = sqrt(pow(r1E_a,2) + pow(r1E_b,2));
+int d_AC = 208;               
+int d_GE = 210;                
+int d_CG = 30 + 17;
+int d_AB = 50;
+int d_BD = 208;
+int d_FG = 50;
+float d_CE = sqrt(pow(d_GE,2) + pow(d_CG,2));
+
+float d_AE, d_AD, d_BC, d_CD;
+float r_AC[2], r_AE[2], r_CE[2], r_GE[2], r_FG[2], r_CD[2];
+float xE, yE, gamma, gamma_2, gamma_3, phi_E, phi_1s, phi_2s, theta_1, theta_2, theta_2s, epsilon;
+double input;
+
+
+const double r2d = 180/PI;
+
 
 
 Kinematics::TF Kinematics::solveFK(float q1, float q2) {
 
-  double r2d = 180/PI;
-  float xE = r01*sin(q1/r2d) + r1E_a*cos(q2/r2d) + r1E_b*cos((90-q2)/r2d);
-  float yE = r01*cos(q1/r2d) - r1E_a*sin(q2/r2d) + r1E_b*sin((90-q2)/r2d);
-  
-  TF fk_pos = {xE*10, yE*10};
+  float r_AB[] = {-d_AB*cos(q2 / r2d), d_AB*sin(q2 / r2d)};
+  float r_AC[] = {d_AC*sin(q1 / r2d),  d_AC*cos(q1 / r2d)};
+  float r_BC[] = {r_AC[0] - r_AB[0], r_AC[1] - r_AB[1]};
+  d_BC = sqrt(pow(r_BC[0],2) + pow(r_BC[1],2));
+  phi_2s = atan2(r_BC[1], r_BC[0]) * r2d;
+  d_CD = d_AB;
+  input = (pow(d_CD,2) + pow(d_BC,2) - pow(d_BD,2)) / (2 * d_BC * d_CD);
+  if (abs(input) > 1) {
+    Serial.println("FK not solveable!");
+        return;
+  }     
+  gamma_3 = acos(input) * r2d;
+  theta_2s = gamma_3 - phi_2s;
+  float r_CG[] = {d_CG*cos((90 - theta_2s) / r2d), d_CG*sin((90 - theta_2s) / r2d)};
+  float r_GE[] = {d_GE*cos(theta_2s / r2d), -d_GE*sin(theta_2s / r2d)};
+  float r_GF[] = {-d_FG * cos(theta_2s / r2d), d_FG * sin(theta_2s / r2d)};
+  xE = r_AC[0] + r_CG[0]+ r_GE[0];
+  yE = r_AC[1] + r_CG[1]+ r_GE[1];
+
+  TF fk_pos = {xE, yE};
   return fk_pos;
 
 }
 
+
+
+// Inverse Kinematik für Stiftposition berechnen
+
 Kinematics::TF Kinematics::solveIK(float xE, float yE) {
 
-// Inverse Kinematik für Drawbot berechnen
-
-// Pose des Endeffektors bzgl. der Basis definieren (Einheit: cm)
-    // Grundstellung: xE = r1E_a;
-    // Grundstellung: yE = r01 + r1E_b;
-float r0E = sqrt(pow(xE,2) + pow(yE,2));    // Abstand EE von Basis berechnen
-
-
-// Gelenkwinkel 1 bestimmen (Einheit: °)
-
-double input = (pow(r01,2) + pow(r0E,2) - pow(r1E,2)) / (2*r01*r0E);
-
-if (abs(input) > 1) {
-  Serial.println("Error: IK not solveable!");
-  return;
-}
-
-double r2d = 180/PI;
-
-float gamma = acos( input ) * r2d;
-float phi_E = atan2(yE, xE) * r2d;
-float theta_1 = 90 - gamma - phi_E;      // Winkel 1 berechnen
-
-//  Gelenkwinkel 2 bestimmen (Einheit: °)
-float r01_vec[] = {r01*sin(theta_1/r2d), r01*cos(theta_1/r2d)};
-float r0E_vec[] = {xE, yE};
-float r1E_vec[] = {r0E_vec[0] - r01_vec[0], r0E_vec[1] - r01_vec[1]};
-float epsilon = atan2(r1E_b, r1E_a)*r2d;
-
-float r1E_a_vec[] = {cos(epsilon/r2d)*r1E_vec[0] + sin(epsilon/r2d)*r1E_vec[1],
-                    -sin(epsilon/r2d)*r1E_vec[0] + cos(epsilon/r2d)*r1E_vec[1]};
-
-float x1 = r1E_a_vec[0];
-float x2 = r1E_a_vec[1];
-float y1 = 1;
-float y2 = 0;
-
-float theta_2 = (atan2(y2,y1) - atan2(x2,x1))*r2d;
-
-TF ik_angles = {theta_1, theta_2};
-
-return ik_angles;
-
-
-}
-
-
-Kinematics::TF Kinematics::solveIK_advanced(float xE, float yE) {
-
-// Inverse Kinematik für Drawbot berechnen
-
-
-// Pose des Endeffektors bzgl. der Basis definieren (Einheit: cm)
-    // Grundstellung: xE = r1E_a;
-    // Grundstellung: yE = r01 + r1E_b;
-float r0E = sqrt(pow(xE,2) + pow(yE,2));    // Abstand EE von Basis berechnen
-
-
-// Gelenkwinkel 1 bestimmen (Einheit: °)
-
-    // Input für acos prüfen: komplexe Winkel abfangen!
-double input = (pow(r01,2) + pow(r0E,2) - pow(r1E,2)) / (2*r01*r0E);
-Serial.print(input);
-
-if (abs(input) > 1) {
-  Serial.println("Error: IK not solveable!");
-  return;
-}
-
-double r2d = 180/PI;
-
-float gamma = acos( input ) * r2d;
-float phi_E = atan2(yE, xE) * r2d;
-float theta_1 = 90 - gamma - phi_E;      // Winkel 1 berechnen
-
-//  Gelenkwinkel 2* bestimmen (Einheit: °)
-float r01_vec[] = {r01*sin(theta_1/r2d), r01*cos(theta_1/r2d)};
-float r0E_vec[] = {xE, yE};
-float r1E_vec[] = {r0E_vec[0] - r01_vec[0], r0E_vec[1] - r01_vec[1]};
-float epsilon = atan2(r1E_b, r1E_a)*r2d;
-
-float r1E_a_vec[] = {cos(epsilon/r2d)*r1E_vec[0] + sin(epsilon/r2d)*r1E_vec[1],
-                    -sin(epsilon/r2d)*r1E_vec[0] + cos(epsilon/r2d)*r1E_vec[1]};
-
-float x1 = r1E_a_vec[0];
-float x2 = r1E_a_vec[1];
-float y1 = 1;
-float y2 = 0;
-
-float theta_2s = (atan2(y2,y1) - atan2(x2,x1))*r2d;
-
-
+  d_AE = sqrt(pow(xE,2) + pow(yE,2));
+  input = (pow(d_AC,2) + pow(d_AE,2) - pow(d_CE,2)) / (2 * d_AC * d_AE);
   
-// Gelenkwinkel 2 bestimmen            
-
-float r11_vec[] = {-r11*cos(theta_2s/r2d), r11*sin(theta_2s/r2d)};
-float r01s_vec[] = {r01_vec[0] + r11_vec[0], r01_vec[1] + r11_vec[1]};
-float r01s = sqrt(pow(r01,2) + pow(r11,2) + 2*r01*r11*sin((theta_2s - theta_1)/r2d));
-float phi_1s = atan2(r01s_vec[1], r01s_vec[0])*r2d;
-
-input = (pow(r00,2) + pow(r01s,2) - pow(r01ss,2)) / (2*r00*r01s);
 if (abs(input) > 1) {
   Serial.println("Error: IK not solveable!");
   return;
 }
 
-float gamma_2 = acos( input ) * r2d;
-float theta_2 = 180 - gamma_2 - phi_1s;
+  gamma = acos( input ) * r2d;
+  phi_E = atan2(yE, xE) * r2d;
+  theta_1 = 90 - gamma - phi_E;
+
+  float r_AC[] = {d_AC*sin(theta_1/r2d), d_AC*cos(theta_1/r2d)};
+  float r_AE[] = {xE, yE};
+  float r_CE[] = {r_AE[0] - r_AC[0], r_AE[1] - r_AC[1]};
+  epsilon = atan2(d_CG, d_GE)*r2d;
+
+  float r_GE[] = {cos(epsilon/r2d)*r_CE[0] + sin(epsilon/r2d)*r_CE[1],
+            -sin(epsilon/r2d)*r_CE[0] + cos(epsilon/r2d)*r_CE[1]};
+
+  theta_2s = (atan2(0, 1) - atan2(r_GE[1],r_GE[0]))*r2d;
+
+  float r_FG[] = {-d_FG*cos(theta_2s/r2d), d_FG*sin(theta_2s/r2d)};  
+  d_AD = sqrt(pow(d_AC,2) + pow(d_FG,2) + 2 * d_AC * d_FG*sin((theta_2s - theta_1)/r2d));
+  
+  float r_AD[] = {r_AC[0] + r_FG[0], r_AC[1] + r_FG[1]};
+
+  phi_1s = atan2(r_AD[1], r_AD[0])*r2d;;
+
+  input = (pow(d_AB,2) + pow(d_AD,2) - pow(d_BD,2)) / (2 * d_AB * d_AD);
+  if (abs(input) > 1) {
+    Serial.println("Error: IK not solveable!");
+    return;
+  }
+
+  gamma_2 = acos( input ) * r2d;
+  theta_2 = 180 - gamma_2 - phi_1s;
 
 
 TF ik_angles = {theta_1, theta_2};

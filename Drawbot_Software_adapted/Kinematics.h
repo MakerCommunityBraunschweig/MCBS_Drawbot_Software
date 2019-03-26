@@ -10,7 +10,6 @@ class Kinematics {
   public:
     TF solveFK(float,float);
     TF solveIK(float,float);
-    TF solveIK_advanced(float,float);
     void set_parameters(float,float,float);
     
 
