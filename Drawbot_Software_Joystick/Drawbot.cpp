@@ -19,11 +19,13 @@
 #define Y_MAX_PIN          15
 
 #define MOTOR_STEPS 200
+#define MOTOR_X_RPM 60
+#define MOTOR_Y_RPM 60
 #define MICROSTEPS 16
 #define TRANSL 4.5                    // Übersetzung
 
 #define MOTOR_ACCEL 200
-#define MOTOR_DECEL 100
+#define MOTOR_DECEL 200
 
 
 
@@ -42,14 +44,14 @@ Drawbot::Drawbot() {
   y_df = 0;
   x_global = 0;
   y_global = 0;
-  
+
 }
 
 
 void Drawbot::setup_motors() {
 
-  stepperX.begin(motors_rpm, MICROSTEPS);
-  stepperY.begin(motors_rpm, MICROSTEPS);
+  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
   stepperX.setSpeedProfile(stepperX.LINEAR_SPEED, MOTOR_ACCEL, MOTOR_DECEL);
   stepperY.setSpeedProfile(stepperY.LINEAR_SPEED, MOTOR_ACCEL, MOTOR_DECEL);
 
@@ -64,7 +66,7 @@ void Drawbot::enable_motors() {
 
   stepperX.enable();
   stepperY.enable();
-  
+
 }
 
 
@@ -72,7 +74,7 @@ void Drawbot::disable_motors() {
 
   stepperX.disable();
   stepperY.disable();
-  
+
 }
 
 
@@ -81,7 +83,7 @@ void Drawbot::set_velocity(int rpm) {
   motors_rpm = rpm;
   stepperX.begin(rpm, MICROSTEPS);
   stepperY.begin(rpm, MICROSTEPS);
-  
+
 }
 
 
@@ -89,12 +91,12 @@ void Drawbot::set_velocities(int x_rpm, int y_rpm) {
 
   stepperX.begin(x_rpm, MICROSTEPS);
   stepperY.begin(y_rpm, MICROSTEPS);
-  
+
 }
 
 
 void Drawbot::move_by_angles(float delta_1, float delta_2) {
-  controller.rotate(TRANSL*delta_1, TRANSL*delta_2);
+  controller.rotate(TRANSL * delta_1, TRANSL * delta_2);
   theta_1 += delta_1;
   theta_2 += delta_2;
 }
@@ -106,14 +108,14 @@ void Drawbot::moveX(float delta_1, float delta_2) {
   float a2 = abs(delta_2);
 
   if (delta_1 > delta_2) {
-    set_velocities(motors_rpm, motors_rpm*(a2/a1));
+    set_velocities(motors_rpm, motors_rpm * (a2 / a1));
   } else if (delta_1 < delta_2) {
-    set_velocities(motors_rpm*(a1/a2), motors_rpm);
+    set_velocities(motors_rpm * (a1 / a2), motors_rpm);
   } else {
     set_velocities(motors_rpm, motors_rpm);
   }
-  
-  controller.rotate(TRANSL*delta_1, TRANSL*delta_2);
+
+  controller.rotate(TRANSL * delta_1, TRANSL * delta_2);
   theta_1 += delta_1;
   theta_2 += delta_2;
 }
@@ -139,11 +141,11 @@ void Drawbot::show_values() {
   x_global = global_pos.c1;
   y_global = global_pos.c2;
   Serial.println("- - - - - - - - - - - - - - - - - - - - - - ");
-  Serial.println("Motorwinkel: q1 = " + String(theta_1)+ "°, q2 = " + String(theta_2) + "°");
-  Serial.println("Pos. Lokal : x_DF = " + String(x_df) + "mm, y_DF = " + String(y_df) + "mm"); 
-  Serial.println("Pos. Global: x_gl = " + String(x_global) + "mm, y_gl = " + String(y_global) + "mm"); 
+  Serial.println("Motorwinkel: q1 = " + String(theta_1) + "°, q2 = " + String(theta_2) + "°");
+  Serial.println("Pos. Lokal : x_DF = " + String(x_df) + "mm, y_DF = " + String(y_df) + "mm");
+  Serial.println("Pos. Global: x_gl = " + String(x_global) + "mm, y_gl = " + String(y_global) + "mm");
 
-  
+
 }
 
 
@@ -155,7 +157,7 @@ void Drawbot::set_joint_values (int q1, int q2) {
 }
 
 int Drawbot::get_joint_value (int qi) {
-  switch(qi) {
+  switch (qi) {
     case 1: return M1_Pos;
     case 2: return M2_Pos;
   }
@@ -169,17 +171,20 @@ int Drawbot::get_joint_value (int qi) {
 
 
 void Drawbot::move_to_point_XY(float xE, float yE) {
-
+  long i = millis();
   Kinematics::TF q;
   q = kin.solveIK(xE, yE);
   float q1 = q.c1;
   float q2 = q.c2;
   float delta_1 = q1 - theta_1;
   float delta_2 = q2 - theta_2;
+  Serial.print("Rechenzeit: "); Serial.print(millis()-i); Serial.println("ms");
+  i = millis();
   moveX(delta_1, delta_2);
   theta_1 = q1;
   theta_2 = q2;
-  
+  Serial.print("Bewegungszeit: "); Serial.print(millis()-i); Serial.println("ms");
+
 }
 
 
@@ -192,8 +197,8 @@ void Drawbot::move_to_point_LERP(float xE, float yE) {
   float q1, q2, delta_1, delta_2;
 
   for (int i = 1; i <= nos; i++) {
-    
-    q = kin.solveIK(x_global + x_delta*(i/nos), y_global + y_delta*(i/nos));
+
+    q = kin.solveIK(x_global + x_delta * (i / nos), y_global + y_delta * (i / nos));
     q1 = q.c1;
     q2 = q.c2;
     delta_1 = q1 - theta_1;
@@ -201,48 +206,51 @@ void Drawbot::move_to_point_LERP(float xE, float yE) {
     moveX(delta_1, delta_2);
     theta_1 = q1;
     theta_2 = q2;
-    
+
   }
-  
+
 }
 
 
 void Drawbot::move_to_angles(float q1, float q2) {
-  
+
   float delta_1 = q1 - theta_1;
   float delta_2 = q2 - theta_2;
 
-  int m1 = round(delta_1*DEG);
-  int m2 = round(delta_2*DEG);
-  
+  int m1 = round(delta_1 * DEG);
+  int m2 = round(delta_2 * DEG);
+
   Serial.println("Sollwinkel: " + String(theta_1) + " | " + String(theta_2));
   Serial.println("Soll-Steps: " + String(m1) + " | " + String(m2));
 
   move_linear_in_js(m1, m2);
   theta_1 = q1;
   theta_2 = q2;
-  
+
 }
 
 
 
 
 void Drawbot::home_all() {
-  
-  while(digitalRead(X_MIN_PIN) and digitalRead(Y_MIN_PIN)) {
-    controller.rotate(-1, -1);
+  stepperX.setSpeedProfile(stepperX.CONSTANT_SPEED);
+  stepperY.setSpeedProfile(stepperY.CONSTANT_SPEED);
+
+  while (digitalRead(X_MIN_PIN) and digitalRead(Y_MIN_PIN)) {
+    controller.move(-50, -50);
   }
-  while(digitalRead(X_MIN_PIN)) {
-    controller.rotate(-1, 0);
+  while (digitalRead(X_MIN_PIN)) {
+    controller.move(-50, 0);
   }
-  while(digitalRead(Y_MIN_PIN)) {
-    controller.rotate(0, -1);
+  while (digitalRead(Y_MIN_PIN)) {
+    controller.move(0, -50);
   }
   init_values();
 
   Serial.println("Home all successfull!");
+  stepperX.setSpeedProfile(stepperX.LINEAR_SPEED, MOTOR_ACCEL, MOTOR_DECEL);
+  stepperY.setSpeedProfile(stepperY.LINEAR_SPEED, MOTOR_ACCEL, MOTOR_DECEL);
 
-  
 }
 
 
@@ -254,9 +262,9 @@ void Drawbot::home_all() {
 
 bool Drawbot::check_boundaries(int m1, int m2) {
 
-  float m1_max = 1.667 * m2 + 4000;  
-  float m1_min = 2.333 * m2 - 1160;  
-  float m2_min =   0.5 * m1 - 1820;  
+  float m1_max = 1.667 * m2 + 4000;
+  float m1_min = 2.333 * m2 - 1160;
+  float m2_min =   0.5 * m1 - 1820;
   float m2_max =   0.5 * m1 + 242;
 
   bool valid = true;
@@ -280,6 +288,6 @@ bool Drawbot::check_boundaries(int m1, int m2) {
     valid = false;
   }
 
-  return valid; 
-  
+  return valid;
+
 }

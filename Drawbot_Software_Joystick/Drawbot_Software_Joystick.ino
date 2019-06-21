@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <Arduino.h>
 
-
 #define X_STEP_PIN         54
 #define X_DIR_PIN          55
 #define X_ENABLE_PIN       38
@@ -19,8 +18,8 @@
 #define LED_PIN            13
 #define SIGNAL_PIN          3
 
-#define X_INPUT            A3
-#define Y_INPUT            A4
+#define Y_INPUT            A3
+#define X_INPUT            A4
 #define XY_BUTTON           0
 
 
@@ -30,6 +29,9 @@ Kinematics kin;
 struct res {
   float c1, c2;
 };
+
+
+
 
 
 
@@ -58,10 +60,9 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Neustart");
 
-
-  db.enable_motors();
   db.setup_motors();
-  
+  db.enable_motors();
+
   db.home_all();
 
   delay(2000);
@@ -80,18 +81,67 @@ void setup() {
 }
 
 
-int xPos = 210, yPos = 238;
+float x_ist = 210, y_ist = 238;
+float x_soll = 210, y_soll = 238;
+double error = 0;
+
+int xmin = 160;
+int xmax = 260;
+int ymin = 188;
+int ymax = 288;
 
 void loop () {
 
-    res r = user_input(xPos, yPos);
-    xPos = r.c1;
-    yPos = r.c2;
+  read_joystick();
 
-    db.move_to_point_LERP(xPos,yPos);
+  error = sqrt(pow(x_soll-x_ist, 2) + pow(y_soll-y_ist, 2));
+
+  if (error > 1){
+    db.move_to_point_XY(x_soll, y_soll);
+    x_ist = x_soll;
+    y_ist = y_soll;
     db.show_values();
+  }
 
-    
+  if (!digitalRead(XY_BUTTON)){
+    db.move_to_point_XY(x_soll, y_soll);
+    x_ist = x_soll;
+    y_ist = y_soll;
+    db.show_values();
+  }
+  
+  
+}
+
+
+
+bool read_joystick() {
+  int x_in = analogRead(X_INPUT);
+  int y_in = analogRead(Y_INPUT);
+  bool result = false;
+  
+  float dx = 1;
+  float dy = 1;
+
+  if (x_in > 515 && x_soll < xmax) {
+    x_soll += dx;
+    result= true;
+  } 
+  else if (x_in < 505 && x_soll > xmin) {
+    x_soll -= dx;
+    result= true;
+  }
+  if (y_in > 505 && y_soll < ymax) {
+    y_soll += dy;
+    result= true;
+  }
+  else if (y_in < 495 && y_soll > ymin) {
+    y_soll -= dy;
+    result= true;
+  }
+  
+  Serial.println("x: " + String(x_soll) + " | y: " + String(y_soll)); 
+  return result;
 }
 
 char rx_byte = 0;
