@@ -2,11 +2,11 @@
 #include <Arduino.h>
 
 
-int d_AC = 208;               
-int d_GE = 210;                
-int d_CG = 30 + 17;
+int d_AC = 210;               
+int d_GE = 213;                
+int d_CG = 30;
 int d_AB = 50;
-int d_BD = 208;
+int d_BD = 204;
 int d_FG = 50;
 float d_CE = sqrt(pow(d_GE,2) + pow(d_CG,2));
 

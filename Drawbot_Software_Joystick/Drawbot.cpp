@@ -178,12 +178,12 @@ void Drawbot::move_to_point_XY(float xE, float yE) {
   float q2 = q.c2;
   float delta_1 = q1 - theta_1;
   float delta_2 = q2 - theta_2;
-  Serial.print("Rechenzeit: "); Serial.print(millis()-i); Serial.println("ms");
+  //Serial.print("Rechenzeit: "); Serial.print(millis()-i); Serial.println("ms");
   i = millis();
   moveX(delta_1, delta_2);
   theta_1 = q1;
   theta_2 = q2;
-  Serial.print("Bewegungszeit: "); Serial.print(millis()-i); Serial.println("ms");
+  //Serial.print("Bewegungszeit: "); Serial.print(millis()-i); Serial.println("ms");
 
 }
 
