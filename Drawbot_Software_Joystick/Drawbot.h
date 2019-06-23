@@ -9,7 +9,9 @@ class Drawbot {
     int M1_Pos, M2_Pos, M1_Dir, M2_Dir;
     int x_df, y_df, x_global, y_global;
     int motors_rpm;
+    int motors_acc;
     float theta_1, theta_2;
+    int mtype;
     Kinematics kin;
     
   public:
@@ -26,7 +28,7 @@ class Drawbot {
     void move_path(int[],int[], int);
     void move_path_XY(int[],int[], int);
     void move_linear_in_js(int,int);
-    void move_by_angles(float, float);
+    void moveA(float, float);
     void move_to_angles(float, float);
     void init_values();
     void move_to_point_XY(float, float);
@@ -34,12 +36,15 @@ class Drawbot {
     void home_all();
     void do_something();
     void setup_motors();
-    void set_velocity(int);
-    void set_velocities(int, int);
+    void set_velocity(short);
+    void set_acceleration(int);
+    void set_linear_speed();
+    void set_constant_speed();
     void enable_motors();
     void disable_motors();
     void moveX(float, float);
     void show_values();
+    void analyze();
 
     void manual_mode();
     bool check_boundaries(int,int);

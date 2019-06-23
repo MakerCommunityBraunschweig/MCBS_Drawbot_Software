@@ -17,6 +17,7 @@
 
 #define LED_PIN            13
 #define POTI_PIN           A9
+#define POTI_PIN_2         A5
 
 #define X_INPUT            A4
 #define Y_INPUT            A3
@@ -32,10 +33,6 @@ Kinematics kin;
 struct res {
   float c1, c2;
 };
-
-
-
-
 
 
 void setup() {
@@ -67,12 +64,12 @@ void setup() {
 // Setup Commands
 
   db.setup_motors();
-  db.enable_motors();
-
   move2initpose(db);
 
   delay(2000);
   db.set_velocity(10);
+  db.set_acceleration(400);
+  db.set_linear_speed();
   db.move_to_point_XY(x_start, y_start);  
   db.show_values();
 
@@ -85,15 +82,21 @@ double error = 0;
 
 
 
-int tolerance = 5;
+short tolerance = 5;
+short velocity = 10;
+short old_vel = 10;
 
 void loop () {
 
     read_joystick();
-    tolerance = read_potentiometer();
+    tolerance = read_poti_1();
+    velocity = read_poti_2();
+    if (velocity != old_vel) {
+      db.set_velocity(velocity);
+    }
     
     error = sqrt(pow(x_soll-x_ist, 2) + pow(y_soll-y_ist, 2));
-    if (error > tolerance or !digitalRead(XY_BUTTON)){
+    if (error > tolerance){
       db.move_to_point_XY(x_soll, y_soll);
       x_ist = x_soll;
       y_ist = y_soll;

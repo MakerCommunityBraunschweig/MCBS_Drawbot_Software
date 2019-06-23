@@ -3,10 +3,10 @@ void move2initpose(Drawbot db) {
   db.home_all();
   delay(2000);
   db.set_velocity(20);
-  //db.moveX(90, 35);
-  db.moveX(135, 80);
-  db.init_values();
-  db.show_values();
+  db.moveA(90, 35);
+  //db.moveX(135, 80);   // Alternative Init-Pose
+  db.init_values();      // Gelenkwinkel initialisieren
+  db.show_values();      // Werte anzeigen
 }
 
 
@@ -45,8 +45,12 @@ bool read_joystick() {
   return result;
 }
 
-int read_potentiometer() {
+short read_poti_1() {
   int poti = analogRead(POTI_PIN);  
-  int res = map(poti, 0, 1023, 1, 10);
-  return res;
+  return map(poti, 0, 1023, 1, 30);
+}
+
+short read_poti_2() {
+  int poti = analogRead(POTI_PIN_2); 
+  return map(poti, 0, 1023, 0, 20);
 }
